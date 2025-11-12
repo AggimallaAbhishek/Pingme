@@ -250,6 +250,7 @@
     let roomId = '';
     let typingTimeout;
     let lastTypingWrite = 0; // throttle for typing writes
+    let joinTimestamp = null; // Track when user joined to filter old messages
 
     let db, auth, app;
 
@@ -360,19 +361,27 @@
       currentUser = username;
 
       try {
+        // Clear any previous messages display first
+        const messagesDiv = document.getElementById('messages');
+        if (messagesDiv) messagesDiv.innerHTML = '';
+
+        // Store join timestamp to filter old messages
+        joinTimestamp = Date.now();
+
         // Add user doc (explicit doc ref)
         const uDoc = userDocRef();
+        const joinTime = serverTimestamp();
         await setDoc(uDoc, {
           username: currentUser,
           isTyping: false,
-          joinedAt: serverTimestamp()
+          joinedAt: joinTime
         });
 
         // Send a "joined" system message
         await addDoc(messagesCollectionRef(), {
           type: 'system',
           content: `${currentUser} joined the chat`,
-          timestamp: serverTimestamp()
+          timestamp: joinTime
         });
 
         // Switch UI
@@ -439,8 +448,29 @@
       } catch (error) {
         console.error("Error during cleanup:", error);
       } finally {
+        // Clear messages display before leaving
+        const messagesDiv = document.getElementById('messages');
+        if (messagesDiv) messagesDiv.innerHTML = '';
+        
+        // Clear users list
+        const usersList = document.getElementById('usersList');
+        if (usersList) usersList.innerHTML = '';
+        const userCount = document.getElementById('userCount');
+        if (userCount) userCount.textContent = '0';
+        
+        // Clear typing indicator
+        const typingIndicator = document.getElementById('typingIndicator');
+        if (typingIndicator) typingIndicator.classList.add('hidden');
+        
+        // Reset state
+        currentUser = '';
+        joinTimestamp = null;
+        
+        // Unsubscribe from listeners
         try { unsubscribeMessages(); } catch(e){}
         try { unsubscribeUsers(); } catch(e){}
+        
+        // Reload page to return to login screen
         location.reload();
       }
     }
@@ -450,10 +480,52 @@
       const q = query(messagesCollectionRef(), orderBy('timestamp'));
       unsubscribeMessages = onSnapshot(q, (snapshot) => {
         const messagesDiv = document.getElementById('messages');
+        if (!messagesDiv) return;
+        
+        // Clear messages display
         messagesDiv.innerHTML = '';
+        
+        // Only show messages from after user joined (filter old messages)
         snapshot.forEach((docSnap) => {
-          displayMessage({ id: docSnap.id, ...docSnap.data() });
+          const messageData = docSnap.data();
+          const messageTimestamp = messageData.timestamp;
+          
+          // If joinTimestamp is set, only show messages after join
+          if (joinTimestamp && messageTimestamp) {
+            try {
+              // Convert Firestore timestamp to milliseconds for comparison
+              let messageTime;
+              if (messageTimestamp && typeof messageTimestamp.toMillis === 'function') {
+                messageTime = messageTimestamp.toMillis();
+              } else if (messageTimestamp && messageTimestamp.seconds) {
+                messageTime = messageTimestamp.seconds * 1000;
+              } else if (typeof messageTimestamp === 'number') {
+                messageTime = messageTimestamp;
+              } else {
+                // Can't determine time, show the message (fallback)
+                displayMessage({ id: docSnap.id, ...messageData });
+                return;
+              }
+              
+              // Only display messages sent after user joined (with 1 second buffer for timing)
+              if (messageTime >= (joinTimestamp - 1000)) {
+                displayMessage({ id: docSnap.id, ...messageData });
+              }
+            } catch (err) {
+              // If timestamp comparison fails, show the message (fallback)
+              console.debug('Timestamp comparison error:', err);
+              displayMessage({ id: docSnap.id, ...messageData });
+            }
+          } else {
+            // If no join timestamp, show all messages (fallback)
+            displayMessage({ id: docSnap.id, ...messageData });
+          }
         });
+        
+        // Auto-scroll to bottom after messages are displayed
+        setTimeout(() => {
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }, 10);
       }, (error) => {
         console.error("Error listening for messages:", error);
       });
