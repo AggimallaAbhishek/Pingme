@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ChatRoom - Real-Time & Shareable</title>
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    .typing-indicator span { animation: blink 1.4s infinite; }
+    .typing-indicator span { animation: blink 1.4s infinite; display:inline-block; margin-right:3px;}
     .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
     .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
     @keyframes blink {
@@ -20,12 +22,13 @@
     .copy-animation { animation: copySuccess 0.5s ease; }
     @keyframes copySuccess {
       0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
+      50% { transform: scale(1.06); }
     }
   </style>
 </head>
 <body class="bg-gray-50">
-  <!-- Login Screen -->
+
+  <!-- LOGIN -->
   <div id="loginScreen" class="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
       <div class="flex justify-center mb-6">
@@ -35,36 +38,25 @@
           </svg>
         </div>
       </div>
-      <h1 class="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-purple-600 to-cyan-600 bg-clip-text text-transparent">
-        Welcome to ChatRoom
-      </h1>
+
+      <h1 class="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-purple-600 to-cyan-600 bg-clip-text text-transparent">Welcome to ChatRoom</h1>
       <p class="text-gray-600 text-center mb-8">Enter your name and invite others!</p>
-      
-      <input 
-        type="text" 
-        id="usernameInput" 
-        placeholder="Enter your name" 
-        class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-purple-500 mb-4 text-lg"
-        maxlength="20"
-      >
-      <button 
-        id="joinButton"
-        onclick="joinChat()" 
+
+      <input id="usernameInput" maxlength="20" placeholder="Enter your name"
+        class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-purple-500 mb-4 text-lg" />
+
+      <button id="joinButton"
         class="w-full bg-gradient-to-r from-purple-600 to-cyan-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200 mb-3 disabled:opacity-50"
-        disabled="true"
-      >
+        disabled>
         Connecting...
       </button>
-      
-      <div class="text-center text-sm text-gray-500">
-        Powered by Firebase. Chat is real-time! 🚀
-      </div>
+
+      <div class="text-center text-sm text-gray-500">Powered by Firebase. Chat is real-time! 🚀</div>
     </div>
   </div>
 
-  <!-- Chat Screen -->
+  <!-- CHAT -->
   <div id="chatScreen" class="hidden h-screen flex flex-col">
-    <!-- Header -->
     <div class="bg-white shadow-md border-b border-gray-200">
       <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between flex-wrap gap-3">
         <div class="flex items-center gap-3">
@@ -78,20 +70,23 @@
             <p class="text-sm text-gray-500">Hi, <span id="currentUsername"></span>!</p>
           </div>
         </div>
+
         <div class="flex items-center gap-2 flex-wrap">
-          <button onclick="showShareModal()" class="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors">
+          <button id="shareBtn" class="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
             </svg>
             <span class="hidden sm:inline">Share</span>
           </button>
-          <button onclick="toggleUsers()" class="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors">
+
+          <button id="usersToggleBtn" class="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
             </svg>
             <span class="hidden sm:inline"><span id="userCount">0</span> Online</span>
           </button>
-          <button onclick="leaveChat()" class="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors">
+
+          <button id="leaveBtn" class="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
             </svg>
@@ -102,11 +97,9 @@
     </div>
 
     <div class="flex-1 max-w-6xl w-full mx-auto flex gap-4 p-4 overflow-hidden">
-      <!-- Messages Area -->
       <div class="flex-1 bg-white rounded-xl shadow-lg flex flex-col overflow-hidden">
         <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
 
-        <!-- Typing Indicator -->
         <div id="typingIndicator" class="px-4 py-2 text-sm text-gray-500 hidden">
           <span class="typing-indicator">
             <span>●</span><span>●</span><span>●</span>
@@ -114,22 +107,10 @@
           <span id="typingUser"></span> is typing...
         </div>
 
-        <!-- Input Area -->
         <div class="p-4 border-t border-gray-200 bg-gray-50">
           <div class="flex gap-2">
-            <input 
-              type="text" 
-              id="messageInput" 
-              placeholder="Type your message..." 
-              class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
-              disabled
-            >
-            <button 
-              id="sendBtn"
-              onclick="sendMessage()" 
-              class="bg-gradient-to-r from-purple-600 to-cyan-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200"
-              disabled
-            >
+            <input id="messageInput" placeholder="Type your message..." class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" disabled />
+            <button id="sendBtn" class="bg-gradient-to-r from-purple-600 to-cyan-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200" disabled>
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
               </svg>
@@ -138,7 +119,6 @@
         </div>
       </div>
 
-      <!-- Online Users Sidebar -->
       <div id="usersSidebar" class="w-64 bg-white rounded-xl shadow-lg p-4 hidden md:block">
         <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
           <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,69 +131,35 @@
     </div>
   </div>
 
-  <!-- Share Modal -->
+  <!-- SHARE MODAL (NO QR) -->
   <div id="shareModal" class="hidden fixed inset-0 bg-black bg-opacity-50 share-modal flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Invite Others</h2>
-        <button onclick="hideShareModal()" class="text-gray-400 hover:text-gray-600">
+        <button id="closeShareModal" class="text-gray-400 hover:text-gray-600">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
       </div>
 
-      <!-- QR Code -->
-      <div class="mb-6 text-center">
-        <div class="bg-gradient-to-br from-purple-50 to-cyan-50 p-6 rounded-xl mb-4">
-          <p class="text-sm text-gray-600 mb-3">Scan this QR code to join:</p>
-          <div class="bg-white p-4 rounded-lg inline-block">
-            <canvas id="qrCanvas"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- Share Link + Download QR -->
       <div class="mb-4">
-        <label class="block text-sm font-semibold text-gray-700 mb-2">Or share this link:</label>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Share this link:</label>
         <div class="flex gap-2 mb-3">
-          <input 
-            type="text" 
-            id="shareLink" 
-            readonly 
-            class="flex-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm"
-          >
-          <button 
-            onclick="copyLink()" 
-            id="copyBtn"
-            class="bg-gradient-to-r from-purple-600 to-cyan-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all flex items-center gap-2"
-          >
+          <input id="shareLink" type="text" readonly class="flex-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm" />
+          <button id="copyBtn" class="bg-gradient-to-r from-purple-600 to-cyan-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
             </svg>
             Copy
           </button>
-          <button 
-            onclick="downloadQr()" 
-            id="downloadQrBtn"
-            class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all flex items-center gap-2"
-            title="Download QR as PNG"
-          >
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Download QR
-          </button>
         </div>
         <p id="copySuccess" class="text-sm text-green-600 mt-2 hidden">✓ Link copied to clipboard!</p>
       </div>
 
-      <!-- Instructions -->
       <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p class="text-sm text-blue-800">
-          <strong>📱 Mobile:</strong> Scan the QR code with your camera<br>
+          <strong>📱 Mobile:</strong> Share the link or paste in browser<br>
           <strong>💻 Desktop:</strong> Copy and paste the link<br>
           <strong>🌐 Works on:</strong> Any device, anywhere!
         </p>
@@ -221,44 +167,28 @@
     </div>
   </div>
 
-  <!-- Firebase + App Script -->
+  <!-- FIREBASE + APP SCRIPT -->
   <script type="module">
-    // Import Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import {
-      getAuth,
-      signInAnonymously,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      collection,
-      addDoc,
-      setDoc,
-      updateDoc,
-      deleteDoc,
-      onSnapshot,
-      query,
-      orderBy,
-      serverTimestamp
+      getFirestore, doc, collection, addDoc, setDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // --- Global State ---
+    // App state
     let currentUser = '';
     let userId = '';
     let roomId = '';
-    let typingTimeout;
-    let lastTypingWrite = 0; // throttle for typing writes
-    let joinTimestamp = null; // Track when user joined to filter old messages
+    let joinTimestamp = null;
+    let typingTimeout = null;
+    let lastTypingWrite = 0;
+    let db = null;
+    let auth = null;
+    let app = null;
 
-    let db, auth, app;
+    let unsubscribeMessages = null;
+    let unsubscribeUsers = null;
 
-    // Unsubscribe functions
-    let unsubscribeMessages = () => {};
-    let unsubscribeUsers = () => {};
-
-    // --- Firebase Config (preserved) ---
     const firebaseConfig = {
       apiKey: "AIzaSyD0cZN-OglXNC5_EmbElR2RTSL6OEEDYMA",
       authDomain: "echolink-3c6f7.firebaseapp.com",
@@ -269,26 +199,27 @@
       measurementId: "G-5M45LPYK7S"
     };
 
-    // Initialize Firebase
-    try {
-      app = initializeApp(firebaseConfig);
-      db = getFirestore(app);
-      auth = getAuth(app);
+    function escapeHtml(unsafe) {
+      return String(unsafe || '')
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+    function safeGet(id) { return document.getElementById(id); }
 
-      // Ensure roomId is determined early
-      getRoomId();
-
-      // Start authentication
-      authenticateUser();
-      console.log("Firebase initialized successfully.");
-    } catch (error) {
-      console.error("Error initializing Firebase:", error);
-      const joinBtn = document.getElementById('joinButton');
-      if (joinBtn) joinBtn.textContent = 'Error: Check Console';
+    function formatTimeAny(ts) {
+      try {
+        if (!ts) return '';
+        if (typeof ts.toMillis === 'function') return new Date(ts.toMillis()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (ts.seconds) return new Date(ts.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (typeof ts === 'number') return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return '';
+      } catch (e) { return ''; }
     }
 
-    // --- Room helper (no leading slashes!) ---
-    function getRoomId() {
+    function getRoomIdFromUrlOrStorage() {
       const urlParams = new URLSearchParams(window.location.search);
       const urlRoomId = urlParams.get('room');
       const localRoomId = localStorage.getItem('chatRoomId');
@@ -302,403 +233,222 @@
         roomId = 'room_' + Math.random().toString(36).substring(2, 11);
         localStorage.setItem('chatRoomId', roomId);
       }
-      console.log("Current Room ID:", roomId);
     }
 
-    // Safe collection/doc refs
-    function messagesCollectionRef() {
-      return collection(db, 'chatrooms', roomId, 'messages');
-    }
-    function usersCollectionRef() {
-      return collection(db, 'chatrooms', roomId, 'users');
-    }
-    function userDocRef() {
-      return doc(db, 'chatrooms', roomId, 'users', userId);
-    }
+    function messagesCollectionRef() { return collection(db, 'chatrooms', roomId, 'messages'); }
+    function usersCollectionRef() { return collection(db, 'chatrooms', roomId, 'users'); }
+    function userDocRef() { return doc(db, 'chatrooms', roomId, 'users', userId); }
 
-    // --- Authentication ---
-    async function authenticateUser() {
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          console.log("User is authenticated:", user.uid);
-          userId = user.uid;
-
-          const joinBtn = document.getElementById('joinButton');
-          if (joinBtn) {
-            joinBtn.disabled = false;
-            joinBtn.textContent = 'Join Chat';
-          }
-        } else {
-          console.log("User is not authenticated. Signing in...");
-          signIn();
-        }
-      });
-    }
-
-    async function signIn() {
+    async function initFirebaseAndAuth() {
       try {
-        await signInAnonymously(auth);
-        console.log("Signed in anonymously.");
-      } catch (error) {
-        console.error("Authentication Error:", error);
-        const joinBtn = document.getElementById('joinButton');
-        if (joinBtn) joinBtn.textContent = 'Auth Error';
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+        getRoomIdFromUrlOrStorage();
+
+        onAuthStateChanged(auth, (user) => {
+          const joinBtn = safeGet('joinButton');
+          if (user) {
+            userId = user.uid;
+            if (joinBtn) {
+              joinBtn.disabled = !(safeGet('usernameInput') && safeGet('usernameInput').value.trim().length > 0);
+              joinBtn.textContent = 'Join Chat';
+            }
+          } else {
+            signInAnonymously(auth).then(() => {
+              console.log('Signed in anonymously');
+            }).catch((err) => {
+              console.error('Auth error', err);
+              if (joinBtn) { joinBtn.disabled = true; joinBtn.textContent = 'Auth Error'; }
+            });
+          }
+        });
+      } catch (err) {
+        console.error('Firebase init error', err);
+        const joinBtn = safeGet('joinButton');
+        if (joinBtn) { joinBtn.disabled = true; joinBtn.textContent = 'Init Error'; }
       }
     }
 
-    // --- Chat Logic ---
     async function joinChat() {
-      const username = document.getElementById('usernameInput').value.trim();
-      if (!username) {
-        console.log("Username is required.");
-        return;
-      }
-      if (!userId) {
-        console.error("User not authenticated. Cannot join.");
-        return;
-      }
+      const username = (safeGet('usernameInput') && safeGet('usernameInput').value.trim()) || '';
+      if (!username) { safeGet('usernameInput').focus(); return; }
+      if (!userId) { console.error('Not authenticated'); return; }
 
       currentUser = username;
-
       try {
-        // Clear any previous messages display first
-        const messagesDiv = document.getElementById('messages');
-        if (messagesDiv) messagesDiv.innerHTML = '';
-
-        // Store join timestamp to filter old messages
-        joinTimestamp = Date.now();
-
-        // Add user doc (explicit doc ref)
-        const uDoc = userDocRef();
-        const joinTime = serverTimestamp();
-        await setDoc(uDoc, {
-          username: currentUser,
-          isTyping: false,
-          joinedAt: joinTime
-        });
-
-        // Send a "joined" system message
-        await addDoc(messagesCollectionRef(), {
-          type: 'system',
-          content: `${currentUser} joined the chat`,
-          timestamp: joinTime
-        });
-
-        // Switch UI
-        document.getElementById('currentUsername').textContent = currentUser;
+        safeGet('currentUsername').textContent = currentUser;
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('chatScreen').classList.remove('hidden');
 
-        // enable message input and send button
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        if (messageInput) messageInput.disabled = false;
-        if (sendBtn) sendBtn.disabled = false;
+        safeGet('messageInput').disabled = false;
+        safeGet('sendBtn').disabled = false;
+
+        joinTimestamp = Date.now();
+
+        const joinTime = serverTimestamp();
+        await setDoc(userDocRef(), { username: currentUser, isTyping: false, joinedAt: joinTime }, { merge: true });
+        await addDoc(messagesCollectionRef(), { type: 'system', content: `${currentUser} joined the chat`, timestamp: joinTime });
 
         listenForMessages();
         listenForUsers();
         setupTypingListener();
-      } catch (error) {
-        console.error("Error joining chat:", error);
+
+      } catch (err) {
+        console.error('Error joining chat', err);
       }
     }
 
     async function sendMessage() {
-      const input = document.getElementById('messageInput');
-      const message = input ? input.value.trim() : '';
-      
-      if (!currentUser) {
-        console.error("You must join first.");
-        return;
-      }
-
-      if (message) {
-        try {
-          await addDoc(messagesCollectionRef(), {
-            type: 'user',
-            sender: currentUser,
-            senderId: userId,
-            content: message,
-            timestamp: serverTimestamp()
-          });
-          if (input) input.value = '';
-
-          // Stop typing (best-effort)
-          clearTimeout(typingTimeout);
-          safeSetTyping(false);
-        } catch (error) {
-          console.error("Error sending message:", error);
-        }
-      }
+      const input = safeGet('messageInput');
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+      if (!userId || !currentUser) { console.error('You must join first'); return; }
+      try {
+        await addDoc(messagesCollectionRef(), {
+          type: 'user',
+          sender: currentUser,
+          senderId: userId,
+          content: text,
+          timestamp: serverTimestamp()
+        });
+        input.value = '';
+        safeSetTyping(false);
+      } catch (err) { console.error('sendMessage failed', err); }
     }
 
     async function leaveChat() {
-      const userConfirmed = window.confirm('Are you sure you want to leave?');
-      if (!userConfirmed) return;
-
+      if (!confirm('Are you sure you want to leave?')) return;
       try {
-        await addDoc(messagesCollectionRef(), {
-          type: 'system',
-          content: `${currentUser} left the chat`,
-          timestamp: serverTimestamp()
-        });
-
-        // Remove user
-        await deleteDoc(userDocRef());
-      } catch (error) {
-        console.error("Error during cleanup:", error);
-      } finally {
-        // Clear messages display before leaving
-        const messagesDiv = document.getElementById('messages');
-        if (messagesDiv) messagesDiv.innerHTML = '';
-        
-        // Clear users list
-        const usersList = document.getElementById('usersList');
-        if (usersList) usersList.innerHTML = '';
-        const userCount = document.getElementById('userCount');
-        if (userCount) userCount.textContent = '0';
-        
-        // Clear typing indicator
-        const typingIndicator = document.getElementById('typingIndicator');
-        if (typingIndicator) typingIndicator.classList.add('hidden');
-        
-        // Reset state
-        currentUser = '';
-        joinTimestamp = null;
-        
-        // Unsubscribe from listeners
-        try { unsubscribeMessages(); } catch(e){}
-        try { unsubscribeUsers(); } catch(e){}
-        
-        // Reload page to return to login screen
-        location.reload();
-      }
+        await addDoc(messagesCollectionRef(), { type: 'system', content: `${currentUser || 'A user'} left the chat`, timestamp: serverTimestamp() });
+        if (userId) await deleteDoc(userDocRef());
+      } catch (err) { console.error('leave cleanup error', err); }
+      finally { cleanupSubscriptions(); location.reload(); }
     }
 
-    // --- Real-time Listeners (use server orderBy timestamp) ---
     function listenForMessages() {
-      const q = query(messagesCollectionRef(), orderBy('timestamp'));
-      unsubscribeMessages = onSnapshot(q, (snapshot) => {
-        const messagesDiv = document.getElementById('messages');
-        if (!messagesDiv) return;
-        
-        // Clear messages display
-        messagesDiv.innerHTML = '';
-        
-        // Only show messages from after user joined (filter old messages)
-        snapshot.forEach((docSnap) => {
-          const messageData = docSnap.data();
-          const messageTimestamp = messageData.timestamp;
-          
-          // If joinTimestamp is set, only show messages after join
-          if (joinTimestamp && messageTimestamp) {
-            try {
-              // Convert Firestore timestamp to milliseconds for comparison
-              let messageTime;
-              if (messageTimestamp && typeof messageTimestamp.toMillis === 'function') {
-                messageTime = messageTimestamp.toMillis();
-              } else if (messageTimestamp && messageTimestamp.seconds) {
-                messageTime = messageTimestamp.seconds * 1000;
-              } else if (typeof messageTimestamp === 'number') {
-                messageTime = messageTimestamp;
-              } else {
-                // Can't determine time, show the message (fallback)
-                displayMessage({ id: docSnap.id, ...messageData });
-                return;
-              }
-              
-              // Only display messages sent after user joined (with 1 second buffer for timing)
-              if (messageTime >= (joinTimestamp - 1000)) {
-                displayMessage({ id: docSnap.id, ...messageData });
-              }
-            } catch (err) {
-              // If timestamp comparison fails, show the message (fallback)
-              console.debug('Timestamp comparison error:', err);
-              displayMessage({ id: docSnap.id, ...messageData });
+      try {
+        const q = query(messagesCollectionRef(), orderBy('timestamp'));
+        if (unsubscribeMessages) try { unsubscribeMessages(); } catch(e){}
+        unsubscribeMessages = onSnapshot(q, (snapshot) => {
+          const messagesDiv = safeGet('messages');
+          if (!messagesDiv) return;
+          messagesDiv.innerHTML = '';
+
+          snapshot.forEach(docSnap => {
+            const data = docSnap.data() || {};
+            let messageMs = null;
+            if (data.timestamp) {
+              if (typeof data.timestamp.toMillis === 'function') messageMs = data.timestamp.toMillis();
+              else if (data.timestamp.seconds) messageMs = data.timestamp.seconds * 1000;
+              else if (typeof data.timestamp === 'number') messageMs = data.timestamp;
             }
-          } else {
-            // If no join timestamp, show all messages (fallback)
-            displayMessage({ id: docSnap.id, ...messageData });
-          }
-        });
-        
-        // Auto-scroll to bottom after messages are displayed
-        setTimeout(() => {
-          messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }, 10);
-      }, (error) => {
-        console.error("Error listening for messages:", error);
-      });
+            if (joinTimestamp && messageMs && messageMs < (joinTimestamp - 1000)) return;
+            displayMessage({ id: docSnap.id, ...data });
+          });
+
+          setTimeout(() => { messagesDiv.scrollTop = messagesDiv.scrollHeight; }, 10);
+        }, (err) => { console.error('messages onSnapshot error', err); });
+      } catch (err) { console.error('listenForMessages error', err); }
     }
 
     function listenForUsers() {
-      const q = query(usersCollectionRef());
-      unsubscribeUsers = onSnapshot(q, (snapshot) => {
-        let users = [];
-        let typingUsers = [];
-        snapshot.forEach((docSnap) => {
-          const userData = docSnap.data() || {};
-          users.push(userData);
-          if (userData.isTyping && docSnap.id !== userId) {
-            typingUsers.push(userData.username);
-          }
-        });
-        updateUsersList(users);
-        updateTypingIndicator(typingUsers);
-      }, (error) => {
-        console.error("Error listening for users:", error);
-      });
+      try {
+        if (unsubscribeUsers) try { unsubscribeUsers(); } catch(e){}
+        const q = query(usersCollectionRef());
+        unsubscribeUsers = onSnapshot(q, (snapshot) => {
+          const users = [];
+          const typingUsers = [];
+          snapshot.forEach(docSnap => {
+            const u = docSnap.data() || {};
+            users.push(u);
+            if (u.isTyping && docSnap.id !== userId) typingUsers.push(u.username || 'Someone');
+          });
+          updateUsersList(users);
+          updateTypingIndicator(typingUsers);
+        }, (err) => { console.error('users onSnapshot error', err); });
+      } catch (err) { console.error('listenForUsers error', err); }
     }
 
-    // --- Typing (throttled & safe) ---
+    function cleanupSubscriptions() {
+      try { if (unsubscribeMessages) unsubscribeMessages(); } catch(e){}
+      try { if (unsubscribeUsers) unsubscribeUsers(); } catch(e){}
+      unsubscribeMessages = null;
+      unsubscribeUsers = null;
+    }
+
     function safeSetTyping(isTyping) {
-      // ensure auth and room ready
       if (!userId || !roomId) return;
       const now = Date.now();
-      // throttle start-typing writes to at most once per 500ms
       if (isTyping && (now - lastTypingWrite < 500)) return;
       lastTypingWrite = now;
-      // write with merge to avoid overwriting username etc.
-      setDoc(userDocRef(), { isTyping }, { merge: true }).catch(err => {
-        // best-effort: ignore errors or optionally console.log
-        console.debug('typing update failed', err);
-      });
+      try { setDoc(userDocRef(), { isTyping }, { merge: true }).catch(err => console.debug('typing update failed', err)); } catch(e){}
     }
 
     function setupTypingListener() {
-      const input = document.getElementById('messageInput');
+      const input = safeGet('messageInput');
       if (!input) return;
-
       input.addEventListener('input', () => {
         if (!userId) return;
         safeSetTyping(true);
         clearTimeout(typingTimeout);
-        typingTimeout = setTimeout(() => { safeSetTyping(false); }, 3000);
+        typingTimeout = setTimeout(() => { safeSetTyping(false); }, 2500);
       });
     }
 
-    function updateTypingIndicator(typingUsers) {
-      const indicator = document.getElementById('typingIndicator');
-      const userSpan = document.getElementById('typingUser');
+    function updateTypingIndicator(names) {
+      const indicator = safeGet('typingIndicator');
+      const userSpan = safeGet('typingUser');
       if (!indicator || !userSpan) return;
-
-      if (!typingUsers || typingUsers.length === 0) {
-        indicator.classList.add('hidden');
-      } else if (typingUsers.length === 1) {
-        userSpan.textContent = typingUsers[0];
-        indicator.classList.remove('hidden');
-      } else {
-        userSpan.textContent = 'Several people';
-        indicator.classList.remove('hidden');
-      }
-    }
-
-    // --- QR generation helpers ---
-    // Generate QR code to canvas for the provided link
-    function generateQrForLink(link) {
-      const canvas = document.getElementById('qrCanvas');
-      if (!canvas || !link) return;
-      // clear first
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Use QRCode lib to render to canvas
-      QRCode.toCanvas(canvas, link, {
-        width: 220,
-        margin: 2,
-        color: { dark: '#5B21B6', light: '#FFFFFF' }
-      }, (error) => {
-        if (error) {
-          console.error('QR generation error:', error);
-        }
-      });
-    }
-
-    // Download the QR currently rendered on canvas as PNG
-    function downloadQr() {
-      const canvas = document.getElementById('qrCanvas');
-      if (!canvas) return;
-      try {
-        const dataUrl = canvas.toDataURL('image/png');
-        const a = document.createElement('a');
-        a.href = dataUrl;
-        // friendly filename with roomId + date
-        const filename = `chatroom-${roomId || 'invite'}-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.png`;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      } catch (err) {
-        console.error('Failed to download QR:', err);
-      }
-    }
-
-    // --- UI & Utilities ---
-    window.joinChat = joinChat;
-    window.sendMessage = sendMessage;
-    window.leaveChat = leaveChat;
-    window.toggleUsers = toggleUsers;
-    window.showShareModal = showShareModal;
-    window.hideShareModal = hideShareModal;
-    window.copyLink = copyLink;
-    window.downloadQr = downloadQr;
-
-    function toggleUsers() {
-      document.getElementById('usersSidebar').classList.toggle('md:block');
-      document.getElementById('usersSidebar').classList.toggle('hidden');
-    }
-
-    function formatTime(timestamp) {
-      if (!timestamp || !timestamp.toMillis) return '...';
-      return new Date(timestamp.toMillis()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      if (!names || names.length === 0) indicator.classList.add('hidden');
+      else if (names.length === 1) { userSpan.textContent = names[0]; indicator.classList.remove('hidden'); }
+      else { userSpan.textContent = 'Several people'; indicator.classList.remove('hidden'); }
     }
 
     function displayMessage(data) {
-      const messagesDiv = document.getElementById('messages');
-      const messageDiv = document.createElement('div');
+      const messagesDiv = safeGet('messages');
+      if (!messagesDiv) return;
+      const wrapper = document.createElement('div');
 
       if (data.type === 'system') {
-        messageDiv.className = 'flex justify-center';
-        messageDiv.innerHTML = `
-          <div class="bg-gray-100 px-4 py-2 rounded-full text-sm text-gray-600">
-            ${escapeHtml(data.content || '')}
-          </div>
-        `;
+        wrapper.className = 'flex justify-center';
+        wrapper.innerHTML = `<div class="bg-gray-100 px-4 py-2 rounded-full text-sm text-gray-600">${escapeHtml(data.content)}</div>`;
       } else {
-        const isCurrentUser = data.senderId === userId;
-        messageDiv.className = `flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`;
-        messageDiv.innerHTML = `
+        const isMe = data.senderId === userId;
+        wrapper.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
+        const timeStr = formatTimeAny(data.timestamp);
+        const senderLabel = escapeHtml(data.sender || 'Unknown');
+        const content = escapeHtml(data.content || '');
+        wrapper.innerHTML = `
           <div class="max-w-xs lg:max-w-md">
-            <div class="rounded-2xl px-4 py-2 ${isCurrentUser ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white' : 'bg-gray-100 text-gray-800'}">
-              <p class="text-xs font-semibold mb-1 opacity-75">${escapeHtml(data.sender || 'Unknown')}</p>
-              <p class="break-words">${escapeHtml(data.content || '')}</p>
+            <div class="rounded-2xl px-4 py-2 ${isMe ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white' : 'bg-gray-100 text-gray-800'}">
+              <p class="text-xs font-semibold mb-1 opacity-75">${senderLabel}</p>
+              <p class="break-words">${content}</p>
             </div>
-            <p class="text-xs text-gray-400 mt-1 px-2">${formatTime(data.timestamp)}</p>
+            <p class="text-xs text-gray-400 mt-1 px-2">${timeStr}</p>
           </div>
         `;
       }
 
-      messagesDiv.appendChild(messageDiv);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      messagesDiv.appendChild(wrapper);
     }
 
     function updateUsersList(users) {
-      const usersList = document.getElementById('usersList');
-      const userCount = document.getElementById('userCount');
+      const usersList = safeGet('usersList');
+      const userCount = safeGet('userCount');
       if (!usersList || !userCount) return;
-
       userCount.textContent = users.length;
-
-      usersList.innerHTML = users.map(user => {
-        const name = user.username || 'Unknown';
-        const initial = name ? name[0].toUpperCase() : '?';
+      usersList.innerHTML = users.map(u => {
+        const name = u.username || 'Unknown';
+        const initial = (name && name[0]) ? name[0].toUpperCase() : '?';
+        const you = (name === currentUser) ? ' (You)' : '';
         return `
           <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-400 to-cyan-400 flex items-center justify-center text-white font-bold">
-              ${initial}
-            </div>
+            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-400 to-cyan-400 flex items-center justify-center text-white font-bold">${initial}</div>
             <div class="flex-1">
-              <p class="font-medium text-gray-800">${escapeHtml(name)}${name === currentUser ? ' (You)' : ''}</p>
+              <p class="font-medium text-gray-800">${escapeHtml(name)}${you}</p>
               <div class="flex items-center gap-1">
                 <div class="w-2 h-2 bg-green-500 rounded-full"></div>
                 <p class="text-xs text-gray-500">Online</p>
@@ -709,99 +459,79 @@
       }).join('');
     }
 
+    // Event bindings & share modal
+    const joinBtn = safeGet('joinButton');
+    const usernameInput = safeGet('usernameInput');
+
+    if (usernameInput) {
+      usernameInput.addEventListener('input', () => {
+        if (joinBtn) joinBtn.disabled = !(usernameInput.value.trim().length > 0 && userId);
+      });
+      usernameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') joinChat(); });
+    }
+    if (joinBtn) joinBtn.addEventListener('click', joinChat);
+
+    const sendBtn = safeGet('sendBtn');
+    const messageInput = safeGet('messageInput');
+    if (messageInput) messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+
+    const usersToggleBtn = safeGet('usersToggleBtn');
+    if (usersToggleBtn) usersToggleBtn.addEventListener('click', () => {
+      const sidebar = safeGet('usersSidebar'); if (!sidebar) return; sidebar.classList.toggle('hidden');
+    });
+
+    const leaveBtn = safeGet('leaveBtn');
+    if (leaveBtn) leaveBtn.addEventListener('click', leaveChat);
+
+    const shareButton = safeGet('shareBtn');
+    const shareModal = safeGet('shareModal');
+    const closeShare = safeGet('closeShareModal');
+    const shareLinkInput = safeGet('shareLink');
+
     function showShareModal() {
-      const modal = document.getElementById('shareModal');
-      const shareLink = document.getElementById('shareLink');
-      const currentUrl = window.location.origin + window.location.pathname + '?room=' + roomId;
-      if (shareLink) shareLink.value = currentUrl;
-
-      // Generate QR for the link
-      generateQrForLink(currentUrl);
-
-      if (modal) modal.classList.remove('hidden');
+      if (!shareModal) return;
+      const currentUrl = window.location.origin + window.location.pathname + '?room=' + encodeURIComponent(roomId);
+      if (shareLinkInput) shareLinkInput.value = currentUrl;
+      shareModal.classList.remove('hidden');
     }
+    function hideShareModal() { if (!shareModal) return; shareModal.classList.add('hidden'); const cs = safeGet('copySuccess'); if (cs) cs.classList.add('hidden'); }
 
-    function hideShareModal() {
-      const modal = document.getElementById('shareModal');
-      if (modal) modal.classList.add('hidden');
-      const copySuccess = document.getElementById('copySuccess');
-      if (copySuccess) copySuccess.classList.add('hidden');
-    }
+    if (shareButton) shareButton.addEventListener('click', showShareModal);
+    if (closeShare) closeShare.addEventListener('click', hideShareModal);
 
-    function copyLink() {
-      const shareLink = document.getElementById('shareLink');
-      if (!shareLink) return;
-      navigator.clipboard.writeText(shareLink.value).then(() => {
-        const copyBtn = document.getElementById('copyBtn');
-        const copySuccess = document.getElementById('copySuccess');
-        if (copyBtn) copyBtn.classList.add('copy-animation');
-        if (copySuccess) copySuccess.classList.remove('hidden');
-
-        setTimeout(() => { if (copyBtn) copyBtn.classList.remove('copy-animation'); }, 500);
-        setTimeout(() => { if (copySuccess) copySuccess.classList.add('hidden'); }, 3000);
-
-        // Regenerate QR just in case (keeps canvas synced)
-        generateQrForLink(shareLink.value);
-      }).catch(err => {
-        console.error('Failed to copy link: ', err);
+    const copyBtnEl = safeGet('copyBtn');
+    const copySuccess = safeGet('copySuccess');
+    if (copyBtnEl && shareLinkInput) {
+      copyBtnEl.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(shareLinkInput.value);
+          copyBtnEl.classList.add('copy-animation');
+          if (copySuccess) copySuccess.classList.remove('hidden');
+          setTimeout(() => copyBtnEl.classList.remove('copy-animation'), 350);
+          setTimeout(() => { if (copySuccess) copySuccess.classList.add('hidden'); }, 3000);
+        } catch (err) {
+          console.error('Copy failed', err);
+          shareLinkInput.select();
+          try { document.execCommand('copy'); if (copySuccess) copySuccess.classList.remove('hidden'); } catch(e){}
+        }
       });
     }
 
-    // Basic HTML escaping for message content (safer)
-    function escapeHtml(unsafe) {
-      return String(unsafe)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-    // --- Graceful cleanup on tab close / navigation (best-effort) ---
-    window.addEventListener('beforeunload', (e) => {
-      // best-effort only (async in beforeunload is unreliable), so fire-and-forget
-      if (!userId || !roomId) return;
-
+    // beforeunload best-effort cleanup
+    window.addEventListener('beforeunload', () => {
       try {
-        // send a "left" system message (no await)
-        addDoc(messagesCollectionRef(), {
-          type: 'system',
-          content: `${currentUser || 'A user'} left the chat`,
-          timestamp: serverTimestamp()
-        }).catch(()=>{});
-
-        // delete user doc (no await)
+        if (!userId || !roomId) return;
+        addDoc(messagesCollectionRef(), { type: 'system', content: `${currentUser || 'A user'} left the chat`, timestamp: serverTimestamp() }).catch(()=>{});
         deleteDoc(userDocRef()).catch(()=>{});
-      } catch (err) {
-        // ignore - best-effort
-      }
+      } catch (e) {}
     });
 
-    // Re-generate QR if the shareLink input is focused (ensures sync if something changed)
-    const shareLinkInput = document.getElementById('shareLink');
-    if (shareLinkInput) {
-      shareLinkInput.addEventListener('focus', () => {
-        const val = shareLinkInput.value || (window.location.origin + window.location.pathname + '?room=' + roomId);
-        generateQrForLink(val);
-      });
-    }
-
-    // Event listeners
-    document.getElementById('usernameInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') joinChat();
-    });
-    document.getElementById('messageInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage();
-    });
-
-    // Safe fallback: ensure roomId exists on load
+    // init
     window.addEventListener('load', () => {
-      if (!roomId) getRoomId();
-      // also populate share link so QR can be generated quickly if user opens modal
-      const shareLink = document.getElementById('shareLink');
-      if (shareLink) shareLink.value = window.location.origin + window.location.pathname + '?room=' + roomId;
-      // generate QR early (optional)
-      // generateQrForLink(shareLink.value);
+      initFirebaseAndAuth();
+      const initialLink = window.location.origin + window.location.pathname + '?room=' + encodeURIComponent(localStorage.getItem('chatRoomId') || '');
+      if (shareLinkInput) shareLinkInput.value = initialLink;
     });
   </script>
 </body>
